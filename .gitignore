@@ -15,3 +15,24 @@ _resources
 
 
 docs/_site
+
+# --- Added during Cholera_genomics integration ---
+
+# Large test fastqs (downloaded via sra-tools - see PR description / README
+# for the download commands, not committed here)
+assets/test_data/*.fastq.gz
+assets/test_data/*.fastq
+
+# Ad-hoc local test run outputs and inputs (test_output/, test_sra_output/,
+# test_reads_dir_output2/, etc. - NOTE: not caught by the existing
+# testing*/testing patterns above, since these start with "test_" not "testing")
+test_*output*/
+test_reads_dir/
+test_contigs/
+test_sra_list.txt
+
+# Ad-hoc local resource-override config (worked around the --max_cpus CLI
+# type-coercion issue during testing)
+local_resources.config
+
+*.bak
