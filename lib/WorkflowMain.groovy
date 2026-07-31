@@ -81,9 +81,11 @@ class WorkflowMain {
         // Check AWS batch settings
         NfcoreTemplate.awsBatch(workflow, params)
 
-        // Check input has been provided
-        if (!params.input) {
-            Nextflow.error("Please provide an input samplesheet to the pipeline e.g. '--input samplesheet.csv'")
+        // Check input has been provided - a samplesheet (--input) OR one or more
+        // of the directory/list auto-discovery flags (from Cholera_genomics
+        // integration).
+        if (!params.input && !params.reads_dir && !params.contigs_dir && !params.sra_list) {
+            Nextflow.error("Please provide an input samplesheet ('--input samplesheet.csv'), or one or more of --reads_dir/--contigs_dir/--sra_list.")
         }
     }
     }
