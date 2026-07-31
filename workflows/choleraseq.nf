@@ -7,10 +7,11 @@
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK                } from '../subworkflows/local/input_check'
+include { GET_INPUT_WF                } from '../subworkflows/local/get_input'
 include { QUALITY_CONTROL_WF         } from '../subworkflows/local/quality_control'
 include { VARIANT_CALLING_WF         } from '../subworkflows/local/variant_calling'
 include { CLUSTERING_WF              } from '../subworkflows/local/clustering'
+include { ASSEMBLY_TYPING_AMR_WF     } from '../subworkflows/local/assembly_typing_amr'
 include { CAT_CAT                    } from '../modules/nf-core/cat/cat/main.nf'
 
 /*
@@ -53,11 +54,16 @@ workflow CHOLERASEQ {
     def checkPathParamList = [ params.input, params.multiqc_config ]
     checkPathParamList.each { param -> if (param) { file(param, checkIfExists: true) } }
 
-    // Check mandatory parameters
-    if (params.input) {
-        ch_input = file(params.input)
-    } else {
-        error('Input samplesheet not specified!')
+    // Check mandatory parameters - accept a samplesheet OR the directory/list
+    // auto-discovery flags (from Cholera_genomics integration). GET_INPUT_WF
+    // enforces the mutual-exclusivity/at-least-one-mode rules itself at runtime;
+    // this is just an early, clear fail if literally nothing was given.
+    if (!params.input && !params.reads_dir && !params.contigs_dir && !params.sra_list) {
+        error('No input specified. Use --input <samplesheet.csv>, or one or more of --reads_dir/--contigs_dir/--sra_list.')
+    }
+
+    if (!(params.download_method in ['sratools', 'ftp', 'aspera'])) {
+        error("--download_method must be one of: sratools, ftp, aspera (got '${params.download_method}')")
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -99,15 +105,14 @@ workflow CHOLERASEQ {
         //============================
 
         //
-        // SUBWORKFLOW: Read in samplesheet, validate and stage input files
+        // SUBWORKFLOW: Get input reads/contigs - samplesheet, directory
+        // auto-discovery, or SRA accession list (see get_input.nf)
         //
-        INPUT_CHECK (
-            ch_input
-        )
-        ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+        GET_INPUT_WF ()
+        ch_versions = ch_versions.mix(GET_INPUT_WF.out.versions)
 
 
-        reads_ch = INPUT_CHECK.out.reads
+        reads_ch = GET_INPUT_WF.out.reads
                     .branch {
                         contigs:  it[0].is_contig == true
                         fastqs:  it[0].is_contig == false
@@ -132,6 +137,22 @@ workflow CHOLERASEQ {
             cleaned_reads_ch
         )
         ch_versions = ch_versions.mix(VARIANT_CALLING_WF.out.versions)
+
+        //
+        // De novo assembly + MLST typing + AMR/virulence screening (from
+        // Cholera_genomics integration). Runs on the same cleaned_reads_ch as
+        // VARIANT_CALLING_WF above - entirely independent branch, doesn't touch
+        // the existing Snippy/consensus/alignment logic. Gated by --skip_assembly
+        // (whole subworkflow) and, inside it, --skip_mlst/--skip_amr (individual
+        // steps). Always invoked with a (possibly empty) channel rather than
+        // conditionally skipped, so ASSEMBLY_TYPING_AMR_WF.out is always defined -
+        // see the note in assembly_typing_amr.nf for why that matters.
+        //
+        assembly_typing_input_ch = params.skip_assembly ? Channel.empty() : cleaned_reads_ch
+        ASSEMBLY_TYPING_AMR_WF ( assembly_typing_input_ch )
+        ch_versions = ch_versions.mix(ASSEMBLY_TYPING_AMR_WF.out.versions)
+        ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLY_TYPING_AMR_WF.out.mlst_tsv.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLY_TYPING_AMR_WF.out.abricate_report.collect{it[1]}.ifEmpty([]))
 
 
         if (!params.skip_clustering) {
