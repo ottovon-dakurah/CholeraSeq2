@@ -30,6 +30,7 @@ test_*output*/
 test_reads_dir/
 test_contigs/
 test_sra_list.txt
+test_output/
 
 # Ad-hoc local resource-override config (worked around the --max_cpus CLI
 # type-coercion issue during testing)
