@@ -43,6 +43,7 @@ class RowChecker:
         first_col="fastq_1",
         second_col="fastq_2",
         single_col="single_end",
+        sra_col="sra_id",
         **kwargs,
     ):
         """
@@ -58,6 +59,10 @@ class RowChecker:
             single_col (str): The name of the new column that will be inserted and
                 records whether the sample contains single- or paired-end sequencing
                 reads (default "single_end").
+            sra_col (str): The name of the optional column that contains an SRA/ENA
+                accession (SRR/ERR/DRR) to download instead of supplying local fastq
+                paths (default "sra_id"). A row must populate either this column OR
+                fastq_1 (+ optionally fastq_2), not both.
 
         """
         super().__init__(**kwargs)
@@ -65,6 +70,7 @@ class RowChecker:
         self._first_col = first_col
         self._second_col = second_col
         self._single_col = single_col
+        self._sra_col = sra_col
         self._seen = set()
         self.modified = []
 
@@ -78,11 +84,36 @@ class RowChecker:
 
         """
         self._validate_sample(row)
-        self._validate_first(row)
-        self._validate_second(row)
-        self._validate_pair(row)
-        self._seen.add((row[self._sample_col], row[self._first_col]))
+        has_sra = self._sra_col in row and len(row.get(self._sra_col, "") or "") > 0
+        has_fastq = len(row.get(self._first_col, "") or "") > 0
+        if has_sra and has_fastq:
+            raise AssertionError(
+                f"A row must populate either '{self._sra_col}' or '{self._first_col}', not both."
+            )
+        if has_sra:
+            self._validate_sra(row)
+            # Pairing is unknown until the accession is actually downloaded -
+            # this placeholder is never read for sra_id rows (input_check.nf
+            # routes them to SRA_DOWNLOAD, not create_fastq_channel).
+            row[self._single_col] = "unknown"
+            self._seen.add((row[self._sample_col], row[self._sra_col]))
+        else:
+            self._validate_first(row)
+            self._validate_second(row)
+            self._validate_pair(row)
+            self._seen.add((row[self._sample_col], row[self._first_col]))
         self.modified.append(row)
+
+    def _validate_sra(self, row):
+        """Assert that the SRA/ENA accession looks like a real accession."""
+        import re
+
+        accession = row[self._sra_col]
+        if not re.match(r"^[SED]RR\d+$", accession):
+            raise AssertionError(
+                f"'{accession}' does not look like a valid SRA/ENA run accession "
+                f"(expected SRR/ERR/DRR followed by digits)."
+            )
 
     def _validate_sample(self, row):
         """Assert that the sample name exists and convert spaces to underscores."""
