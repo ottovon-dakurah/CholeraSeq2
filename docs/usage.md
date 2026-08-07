@@ -4,7 +4,7 @@
 
 ## Introduction
 
-**CERI-KRISP/CholeraSeq** is a Nextflow pipeline for genomic data analysis of Cholera outbreaks.
+**CERI-KRISP/CholeraSeq** is a Nextflow pipeline for genomic data analysis of Cholera outbreaks: quality control, reference-based variant calling and core-genome alignment, de novo assembly, MLST typing, AMR/virulence/plasmid screening, FastBAPS clustering, per-cluster recombination filtering (Gubbins), and phylogenetic reconstruction (IQ-TREE).
 
 ## Dataset
 
@@ -12,32 +12,55 @@ We have created a multi-fasta reference with global cohort available on NCBI, av
 
 [![Zenodo Dataset](http://img.shields.io/badge/DOI-10.5281/zenodo.10984554-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.10984554)
 
-## Samplesheet input
+## Input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+CholeraSeq accepts input in one of four ways. `--input` (samplesheet) is mutually exclusive with the other three; `--reads_dir`/`--contigs_dir`/`--sra_list` can be freely combined with each other in a single run.
+
+### 1. Samplesheet (`--input`)
+
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. It has to be a comma-separated file with a header row, as shown in the examples below.
 
 ```bash
---samplesheet '[path to samplesheet file]'
+--input '[path to samplesheet file]'
 ```
 
-### Full samplesheet
+The input samplesheet should be in CSV format, containing any mix of:
 
-# Input
-
-The input samplesheet should be in CSV format, containing either of the three possibilities
-
-1. Paired-end reads (e.g `SRR8364252`)
-
-2. Single-end reads (e.g. `SRR771360` )
-
-3. Fasta files (e.g. `AHGB01000000`)
+1. Paired-end reads (e.g. `SRR8364252`)
+2. Single-end reads (e.g. `SRR771360`)
+3. Pre-assembled fasta files (e.g. `AHGB01000000`) - detected automatically from the file extension, and skip assembly/variant-calling steps that don't apply
+4. An SRA/ENA accession to download, via the `sra_id` column, instead of supplying local `fastq_1`/`fastq_2` paths
 
 ```csv
-sample,fastq_1,fastq_2
-SRR8364252,ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR836/002/SRR8364252/SRR8364252_1.fastq.gz,ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR836/002/SRR8364252/SRR8364252_2.fastq.gz
-SRR771360,ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR771/SRR771360/SRR771360.fastq.gz,
-AHGB01000000.1,https://github.com/CERI-KRISP/CholeraSeq/raw/b0beafcc6c1315e2782667f0306b10f8b3b7e09a/resources/test_fastas/AHGB01.fasta,
+sample,fastq_1,fastq_2,sra_id
+SRR8364252,https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR836/002/SRR8364252/SRR8364252_1.fastq.gz,https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR836/002/SRR8364252/SRR8364252_2.fastq.gz,
+SRR771360,https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR771/SRR771360/SRR771360.fastq.gz,,
+AHGB01000000.1,https://github.com/CERI-KRISP/CholeraSeq/raw/b0beafcc6c1315e2782667f0306b10f8b3b7e09a/resources/test_fastas/AHGB01.fasta,,
+SRR12345678,,,SRR12345678
 ```
+
+> 💡 **Hint**: use `https://` rather than `ftp://` for EBI-hosted URLs - `https://` has proven more reliable for staging large files from `ftp.sra.ebi.ac.uk`. A row's `sra_id` and `fastq_1`/`fastq_2` are mutually exclusive - populate one or the other, not both.
+
+### 2. Directory auto-discovery (`--reads_dir` / `--contigs_dir`)
+
+No samplesheet needed - point the pipeline directly at a directory:
+
+```bash
+nextflow run CERI-KRISP/CholeraSeq -profile docker --outdir results \
+  --reads_dir /path/to/fastqs --contigs_dir /path/to/contigs
+```
+
+`--reads_dir` auto-discovers both paired-end (`<id>_R1/_R2.fastq.gz` or `<id>_1/_2.fastq.gz`) and single-end (`<id>.fastq.gz`) files. `--contigs_dir` expects `<id>_contigs.fasta` files.
+
+### 3. SRA/ENA accession list (`--sra_list`)
+
+A plain text file, one accession (SRR/ERR/DRR) per line:
+
+```bash
+nextflow run CERI-KRISP/CholeraSeq -profile docker --outdir results --sra_list accessions.txt
+```
+
+Downloads go via `sra-tools`, selected with `--download_method sratools` (the default, and currently the only implemented method - `ftp` and `aspera` are scaffolded for future use and will fail fast with a clear message if selected, rather than silently falling back to something else).
 
 ## Running the pipeline
 
@@ -61,12 +84,14 @@ The command for running the pipeline is as follows:
 ```bash
 nextflow run CERI-KRISP/CholeraSeq \
          -profile docker \
-         --samplesheet /path/to/samplesheet.csv \
+         --input /path/to/samplesheet.csv \
          --outdir results
 
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+
+> ⚠️ **Note**: running against `-profile docker` alone (without `test`) means none of `test.config`'s defaults apply - in particular you'll need to supply `--ref_genbank` yourself (variant calling always needs a reference, regardless of which input mode you use), and you may want to set `--max_memory`/`--max_cpus`/`--max_time` explicitly to match your machine, since the pipeline's own defaults (128.GB / 16 cpus / 240h) are sized for a shared cluster, not a laptop.
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -109,6 +134,8 @@ When you run the above command, Nextflow automatically pulls the pipeline code f
 ```bash
 nextflow pull ceri-krisp/choleraseq
 ```
+
+> 💡 **Hint**: if you're developing against a local fork or clone, run the pipeline with `nextflow run . -profile ...` from inside the repository directory instead of `nextflow run CERI-KRISP/CholeraSeq ...` - the latter always pulls the upstream repository from GitHub, bypassing any local changes you haven't pushed.
 
 ### Reproducibility
 

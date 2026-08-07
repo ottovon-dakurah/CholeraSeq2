@@ -17,11 +17,13 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 As of `v1.1.0` the outputs of CholeraSeq pipeline are stored in the following directory structure. We intend to change this directory structure based on feedback from routine users.
 
 ```
+├── abricate
 ├── cat
 ├── fastp
 ├── fastqc
 ├── iqtree
 ├── mask
+├── mlst
 ├── multiqc
 │   ├── multiqc_data
 │   └── multiqc_plots
@@ -32,9 +34,40 @@ As of `v1.1.0` the outputs of CholeraSeq pipeline are stored in the following di
 ├── samtools
 ├── seqkit
 ├── snippy
+├── spades
+├── sra
 └── utils
 
 ```
+
+> 💡 **Hint**: `abricate`, `mlst`, and `spades` are only present if `--skip_amr`/`--skip_mlst`/`--skip_assembly` are `false` (the default). `sra` is only present when using `sra_id` samplesheet rows or `--sra_list`.
+
+### Assembly, typing & AMR
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `spades/`
+  - `<sample>.scaffolds.fa.gz`: SPAdes assembly (skipped for samples that were already contigs on input).
+  - `<sample>.spades.log`: SPAdes run log.
+- `mlst/`
+  - `<sample>.tsv`: MLST sequence type call.
+- `abricate/`
+  - `<sample>.txt`: AMR/virulence/plasmid gene hits.
+
+</details>
+
+[SPAdes](https://github.com/ablab/spades) performs de novo genome assembly for samples supplied as reads (samples already supplied as contigs skip this step). [MLST](https://github.com/tseemann/mlst) and [ABRicate](https://github.com/tseemann/abricate) then run on the resulting assembly (or the original contigs).
+
+### SRA download
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `sra/`
+  - `<sample>*.fastq.gz`: reads downloaded for samplesheet rows using the `sra_id` column, or accessions supplied via `--sra_list`.
+
+</details>
 
 ### MultiQC
 
