@@ -36,3 +36,4 @@ test_sra_list.txt
 local_resources.config
 
 *.bak
+docs/.Rhistory
