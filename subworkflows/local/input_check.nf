@@ -19,7 +19,7 @@ workflow INPUT_CHECK {
             // NOTE: sra_id rows can't go through create_fastq_channel - the fastq
             // files don't exist locally yet, they need an actual download process
             // first (SRA_DOWNLOAD below). check_samplesheet.py already enforces
-            // that a row populates sra_id X OR fastq_1, so this split is unambiguous.
+            // that a row populates sra_id XOR fastq_1, so this split is unambiguous.
             sra:  it.sra_id?.trim()
             file: !it.sra_id?.trim()
         }
@@ -36,7 +36,7 @@ workflow INPUT_CHECK {
     // where it's given explicitly in the samplesheet)
     //
     SRA_DOWNLOAD (
-        parsed_rows_ch.sra.map { row -> [ id: row.sample, sra_id: row.sra_id.trim() ] }
+        parsed_rows_ch.sra.map { row -> [ id: row.sample, sra_id: row.sra_id.trim(), platform: row.platform ?: 'illumina' ] }
     )
     ch_versions = ch_versions.mix(SRA_DOWNLOAD.out.versions)
 
@@ -61,6 +61,7 @@ def create_fastq_channel(LinkedHashMap row) {
     meta.id         = row.sample
     meta.single_end = row.single_end.toBoolean()
     meta.is_contig  = check_is_contig(row.fastq_1)
+    meta.platform   = row.platform ?: 'illumina'
 
     // add path(s) of the fastq file(s) to the meta map
     // NOTE: file(...).exists() is only checked for local paths. For remote URLs

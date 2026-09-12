@@ -37,3 +37,4 @@ local_resources.config
 
 *.bak
 docs/.Rhistory
+sra_results/

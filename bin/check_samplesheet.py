@@ -27,11 +27,6 @@ class RowChecker:
     VALID_FORMATS = (
         ".fq.gz",
         ".fastq.gz",
-        ##########
-        #FIXME:Evaluate the accommodation of these uncompressed formats again.
-        #".fq",
-        #".fastq",
-        ##########
         ".fasta",
         ".fna",
         ".fa"
@@ -44,6 +39,7 @@ class RowChecker:
         second_col="fastq_2",
         single_col="single_end",
         sra_col="sra_id",
+        platform_col="platform",
         **kwargs,
     ):
         """
@@ -63,6 +59,10 @@ class RowChecker:
                 accession (SRR/ERR/DRR) to download instead of supplying local fastq
                 paths (default "sra_id"). A row must populate either this column OR
                 fastq_1 (+ optionally fastq_2), not both.
+            platform_col (str): The name of the optional column recording the
+                sequencing platform - "illumina" (default if omitted/empty),
+                "nanopore", or "pacbio". nanopore/pacbio rows must be single-end
+                (no fastq_2) since long reads have no paired-end concept here.
 
         """
         super().__init__(**kwargs)
@@ -71,6 +71,7 @@ class RowChecker:
         self._second_col = second_col
         self._single_col = single_col
         self._sra_col = sra_col
+        self._platform_col = platform_col
         self._seen = set()
         self.modified = []
 
@@ -84,6 +85,7 @@ class RowChecker:
 
         """
         self._validate_sample(row)
+        self._validate_platform(row)
         has_sra = self._sra_col in row and len(row.get(self._sra_col, "") or "") > 0
         has_fastq = len(row.get(self._first_col, "") or "") > 0
         if has_sra and has_fastq:
@@ -93,8 +95,7 @@ class RowChecker:
         if has_sra:
             self._validate_sra(row)
             # Pairing is unknown until the accession is actually downloaded -
-            # this placeholder is never read for sra_id rows (input_check.nf
-            # routes them to SRA_DOWNLOAD, not create_fastq_channel).
+            # (input_check.nf routes them to SRA_DOWNLOAD, not create_fastq_channel).
             row[self._single_col] = "unknown"
             self._seen.add((row[self._sample_col], row[self._sra_col]))
         else:
@@ -103,6 +104,24 @@ class RowChecker:
             self._validate_pair(row)
             self._seen.add((row[self._sample_col], row[self._first_col]))
         self.modified.append(row)
+
+    def _validate_platform(self, row):
+        """Normalize platform to 'illumina' if empty/absent; validate the value;
+        reject fastq_2 for long-read platforms (no paired-end concept here)."""
+        valid_platforms = ("illumina", "nanopore", "pacbio")
+        platform = (row.get(self._platform_col, "") or "").strip().lower()
+        if not platform:
+            platform = "illumina"
+        if platform not in valid_platforms:
+            raise AssertionError(
+                f"'{platform}' is not a recognized platform. Must be one of: {', '.join(valid_platforms)}."
+            )
+        if platform in ("nanopore", "pacbio") and len(row.get(self._second_col, "") or "") > 0:
+            raise AssertionError(
+                f"platform '{platform}' does not support paired-end input - "
+                f"leave '{self._second_col}' empty for long-read samples."
+            )
+        row[self._platform_col] = platform
 
     def _validate_sra(self, row):
         """Assert that the SRA/ENA accession looks like a real accession."""
@@ -247,6 +266,8 @@ def check_samplesheet(file_in, file_out):
         checker.validate_unique_samples()
     header = list(reader.fieldnames)
     header.insert(1, "single_end")
+    if "platform" not in header:
+        header.insert(2, "platform")
     # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
     with file_out.open(mode="w", newline="") as out_handle:
         writer = csv.DictWriter(out_handle, header, delimiter=",")
