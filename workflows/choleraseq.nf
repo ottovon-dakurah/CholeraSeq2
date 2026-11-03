@@ -93,13 +93,25 @@ workflow CHOLERASEQ {
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
+    // Global core alignment: on by default. A user-supplied path or URL wins; otherwise the
+    // curated alignment in params.default_global_core_alignment is used, unless the user turns
+    // it off. Values given on the command line arrive as strings under Nextflow 26, so
+    // 'false'/'no'/'0' are treated as off.
+    def off_values = ['false', 'no', '0', 'null', 'none']
+    def use_global = !(params.use_global_alignment.toString().toLowerCase() in off_values)
+    def global_core_aln = use_global ? (params.global_core_alignment ?: params.default_global_core_alignment) : null
+    if (global_core_aln) {
+        log.info "Using global core alignment: ${global_core_aln}"
+    } else {
+        log.info "Global core alignment disabled: this cohort will be analysed on its own"
+    }
 
-    if (params.global_core_alignment && params.cohort_core_alignment) {
+    if (global_core_aln && params.cohort_core_alignment) {
         //=========================
         // PATCH GLOBAL GENOME ALIGNMENT
         //=========================
 
-        in_cat_cat = Channel.of([[id: 'concatenate_alns'], [file(params.global_core_alignment), file(params.cohort_core_alignment)]])
+        in_cat_cat = Channel.of([[id: 'concatenate_alns'], [file(global_core_aln), file(params.cohort_core_alignment)]])
 
         CAT_CAT(in_cat_cat)
 
@@ -199,11 +211,11 @@ workflow CHOLERASEQ {
 
         if (!params.skip_clustering) {
 
-            if(params.global_core_alignment ) {
+            if (global_core_aln) {
 
                 cohort_core_aln = VARIANT_CALLING_WF.out.concatenated_aln.map{it -> tuple([id:'patch_global_with_cohort_aln'], file(it[1]))}
 
-                ch_global_aln = Channel.of([[id: 'patch_global_with_cohort_aln'], file(params.global_core_alignment)])
+                ch_global_aln = Channel.of([[id: 'patch_global_with_cohort_aln'], file(global_core_aln)])
 
                 ch_cat_alignments = ch_global_aln.join(cohort_core_aln).map { m, f1, f2 -> [m, [f1, f2]] }
 

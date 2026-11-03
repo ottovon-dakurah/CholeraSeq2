@@ -109,6 +109,16 @@ Some samples cannot contribute to a core-genome alignment. They are left out bef
 
 If nothing is left after these checks, the run stops with a clear message.
 
+## Global context
+
+By default each run merges the cohort's core alignment with a curated global core alignment of published *V. cholerae* genomes, so new isolates are placed among known lineages before clustering, recombination filtering and phylogenetics.
+
+- To analyse the cohort on its own, put `use_global_alignment: false` in a params file. A value typed on the command line also works here (`--use_global_alignment false`), because this parameter accepts the string.
+- To use your own reference alignment instead, set `global_core_alignment` to its path or URL.
+- The curated alignment is downloaded at run time, so a run needs network access unless you point `global_core_alignment` at a local copy.
+
+Adding the global alignment increases the number of sequences going into Gubbins and IQ-TREE, so these steps take longer.
+
 ## Running the pipeline
 
 ### Example command
@@ -210,7 +220,8 @@ See [parameters.md](parameters.md) for the full parameter reference. Common sett
 - `sra_list`, `ont_sra_list`, `pacbio_sra_list`: accession lists to download
 - `outdir`: output directory
 - `ref_genbank`: reference GenBank file (required)
-- `global_core_alignment`: input global core alignment file
+- `use_global_alignment`: merge with the curated global core alignment (default `true`; set `false` in a params file for cohort-only)
+- `global_core_alignment`: your own global core alignment file, instead of the curated one
 - `cohort_core_alignment`: input cohort core alignment file
 - `skip_fastbaps`: skip FastBAPS clustering
 - `skip_clustering`: skip the clustering and tree workflow

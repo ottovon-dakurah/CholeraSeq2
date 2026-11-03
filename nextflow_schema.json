@@ -400,12 +400,23 @@
                 "global_core_alignment": {
                     "type": "string",
                     "format": "file-path",
-                    "description": "Path to an existing global core alignment fasta to merge with. See https://doi.org/10.5281/zenodo.10984554"
+                    "description": "Your own global core alignment to merge with, overriding default_global_core_alignment. Ignored when use_global_alignment is false."
                 },
                 "cohort_core_alignment": {
                     "type": "string",
                     "format": "file-path",
                     "description": "Path to an existing cohort core alignment fasta to merge with global_core_alignment."
+                },
+                "use_global_alignment": {
+                    "type": "boolean",
+                    "default": true,
+                    "fa_icon": "fas fa-globe-africa",
+                    "description": "Merge the cohort with the curated global core alignment (on by default). Set to false in a params file for a cohort-only analysis."
+                },
+                "default_global_core_alignment": {
+                    "type": "string",
+                    "fa_icon": "fas fa-link",
+                    "description": "URL or path of the curated global core alignment used when use_global_alignment is true and no global_core_alignment is given."
                 }
             }
         },

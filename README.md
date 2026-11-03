@@ -66,6 +66,8 @@ Instead of a sample sheet, samples can be found in folders (`--reads_dir`, `--on
 
 A reference GenBank file is required (`--ref_genbank`). The repository includes `resources/reference/GCF_003063785.full.gbk`, which is recommended for compatibility with the published global core alignment.
 
+By default each run merges the cohort with a curated global core alignment of published *V. cholerae* genomes, placing new isolates among known lineages. Use `--use_global_alignment false` (or `use_global_alignment: false` in a params file) for a cohort-only analysis, or `--global_core_alignment` to supply your own alignment.
+
 > **Note:** on Nextflow 26, values typed on the command line arrive as text: `--skip_fastbaps false` does not switch a step on, and `--max_cpus 8` fails validation. Put such values in a params file instead (see `docs/usage.md`).
 
 ## Documentation

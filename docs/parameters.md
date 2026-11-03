@@ -30,7 +30,9 @@ Give either `input`, or one or more of the folder and accession-list options (th
 | Parameter | Default | Description |
 | --- | --- | --- |
 | `ref_genbank` | none (required) | Path to the reference GenBank file used by `snippy` and `varcodons.py`. The repository includes `resources/reference/GCF_003063785.full.gbk`, which is recommended for compatibility with the published global core alignment. The `test` profile sets it. |
-| `global_core_alignment` | `null` | Path to an existing global core-genome alignment FASTA to merge with cohort sequences. |
+| `use_global_alignment` | `true` | Merge the cohort with the curated global core alignment, so new genomes are placed in a global context. Set `false` in a params file for a cohort-only analysis. |
+| `default_global_core_alignment` | Zenodo URL | The curated global core alignment used when `use_global_alignment` is true and no `global_core_alignment` is given. |
+| `global_core_alignment` | `null` | Your own global core-genome alignment FASTA to merge with, instead of the curated one. Ignored when `use_global_alignment` is false. |
 | `cohort_core_alignment` | `null` | Path to an existing cohort core-genome alignment FASTA to merge into a global core alignment. |
 
 ## Quality control and variant calling
