@@ -118,7 +118,7 @@ When enabled, the pipeline concatenates the provided alignments and then proceed
 
 - `skip_clustering` will skip the clustering/tree workflow entirely.
 - `skip_fastbaps` (default `true`) skips FastBAPS, so Gubbins runs on the whole alignment. With FastBAPS on, Gubbins runs per cluster, and samples in clusters smaller than `min_partition_size` are not in the final tree.
-- On Nextflow 26, set booleans to `false` and numbers in a params file, not on the command line (see [usage.md](usage.md)).
+- Numbers and switches can be set on the command line or in a params file (see [usage.md](usage.md)).
 - The workflow focuses on phylogeny and QC, with typing and AMR screening alongside; it does not cover serotyping or downstream epidemiological annotation.
 
 ## Outputs and results

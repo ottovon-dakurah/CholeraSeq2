@@ -14,6 +14,60 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PARAMETER TYPES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+// Values given on the command line arrive as text: without a declared type,
+// `--max_cpus 8` is the string "8" (so arithmetic on it fails) and
+// `--skip_fastbaps false` is the string "false", which is truthy and therefore
+// does NOT switch the step off. Declaring the type here makes Nextflow convert
+// command-line values, so numbers and booleans can be set with plain flags
+// instead of only through a params file.
+//
+// Types only: every default stays in nextflow.config, which remains the single
+// source of truth. String parameters need no declaration, as text is already
+// what they expect. Decimals must be Float; Double and BigDecimal reject
+// command-line values.
+params {
+    // switches
+    use_global_alignment: Boolean
+    skip_fastbaps: Boolean
+    skip_clustering: Boolean
+    skip_assembly: Boolean
+    skip_mlst: Boolean
+    skip_amr: Boolean
+    plaintext_email: Boolean
+    monochrome_logs: Boolean
+    help: Boolean
+    version: Boolean
+    validate_params: Boolean
+    show_hidden_params: Boolean
+
+    // whole numbers
+    max_cpus: Integer
+    pacbio_detect_reads: Integer
+    long_read_min_length: Integer
+    long_read_keep_percent: Integer
+    min_trim_quality: Integer
+    min_trim_length: Integer
+    min_mapping_quality: Integer
+    min_base_quality: Integer
+    min_site_coverage: Integer
+    snippy_minqual: Integer
+    max_missing_percentage: Integer
+    abricate_minid: Integer
+    abricate_mincov: Integer
+    min_partition_size: Integer
+
+    // decimals
+    pacbio_detect_threshold: Float
+    min_allele_fraction: Float
+    min_parsimony_coverage: Float
+}
+
 include { CHOLERASEQ } from './workflows/choleraseq'
 
 //

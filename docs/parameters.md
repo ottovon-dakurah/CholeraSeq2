@@ -2,7 +2,7 @@
 
 This document lists the main configuration parameters used by the CholeraSeq pipeline. For full parameter discovery, see `nextflow.config`.
 
-> **Command-line values on Nextflow 26** arrive as text: `--skip_x true` works, but `--skip_x false` does not switch a step on, and numbers such as `--max_cpus 8` fail validation. Put such values in a params file (`-params-file params.yaml`).
+> Numbers and switches can be given directly on the command line (`--max_cpus 32`, `--skip_fastbaps false`): the pipeline declares each parameter's type, so Nextflow converts the value. A params file (`-params-file params.yaml`) works too and is useful for recording a configuration.
 
 ## Input and output
 
@@ -82,7 +82,7 @@ Nanopore and PacBio samples are quality-checked (NanoPlot), filtered (Filtlong) 
 
 | Parameter | Default | Description |
 | --- | --- | --- |
-| `skip_fastbaps` | `true` | Skip the optional FastBAPS clustering step; Gubbins then runs on the whole alignment. With `false`, Gubbins runs per FastBAPS cluster. Set `false` in a params file, not on the command line. |
+| `skip_fastbaps` | `true` | Skip the optional FastBAPS clustering step; Gubbins then runs on the whole alignment. With `false`, Gubbins runs per FastBAPS cluster. Set with `--skip_fastbaps false` or in a params file. |
 | `min_partition_size` | `4` | With FastBAPS on: clusters with fewer samples than this skip Gubbins (RAxML cannot build a tree from them), and their samples are not in the final tree. |
 | `skip_clustering` | `false` | Skip the clustering and tree inference workflow. This also skips the `iqtree` tree step. |
 
@@ -105,7 +105,7 @@ Nanopore and PacBio samples are quality-checked (NanoPlot), filtered (Filtlong) 
 | `config_profile_description` | `null` | Optional profile description. |
 | `config_profile_name` | `null` | Optional profile name to expose to readers. |
 | `max_memory` | `128.GB` | Maximum memory limit applied to pipeline processes. Lower it on smaller machines, e.g. `--max_memory 20.GB`. |
-| `max_cpus` | `16` | Maximum CPU limit for pipeline processes. Set it in a params file, not on the command line. |
+| `max_cpus` | `16` | Maximum CPU limit for pipeline processes. Set with `--max_cpus 32` or in a params file. |
 | `max_time` | `240.h` | Maximum runtime limit for pipeline processes. IQ-TREE is allowed up to 72 h, so keep this at or above `72.h`. |
 
 Gubbins always runs single-threaded on purpose: with several threads its recombination output (GFF) can be corrupted.

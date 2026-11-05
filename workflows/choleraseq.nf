@@ -71,8 +71,8 @@ workflow CHOLERASEQ {
         error("--platform must be one of: illumina, nanopore, pacbio, pacbio_hifi, pacbio_clr (got '${params.platform}')")
     }
 
-    if (!(params.pacbio_mode in ['hifi', 'raw'])) {
-        error("--pacbio_mode must be one of: hifi, raw (got '${params.pacbio_mode}')")
+    if (!(params.pacbio_mode.toString().toLowerCase() in ['auto', 'hifi', 'raw'])) {
+        error("--pacbio_mode must be one of: auto, hifi, raw (got '${params.pacbio_mode}')")
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

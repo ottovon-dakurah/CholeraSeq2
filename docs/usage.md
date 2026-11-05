@@ -114,7 +114,7 @@ If nothing is left after these checks, the run stops with a clear message.
 
 By default each run merges the cohort's core alignment with a curated global core alignment of published *V. cholerae* genomes, so new isolates are placed among known lineages before clustering, recombination filtering and phylogenetics.
 
-- To analyse the cohort on its own, put `use_global_alignment: false` in a params file. A value typed on the command line also works here (`--use_global_alignment false`), because this parameter accepts the string.
+- To analyse the cohort on its own, use `--use_global_alignment false`, or put `use_global_alignment: false` in a params file.
 - To use your own reference alignment instead, set `global_core_alignment` to its path or URL.
 - The curated alignment holds 4196 public *V. cholerae* genomes and is about 17.3 GB. It is downloaded at run time, so a run needs network access and disk space; for repeated runs, download it once and point `global_core_alignment` at the local copy. The same Zenodo record also holds a 100-genome subset (`cholera_global_n100_...`) intended for testing, which is useful for a quick check but is not the global alignment.
 
@@ -157,7 +157,7 @@ ref_genbank: ./resources/reference/GCF_003063785.full.gbk
 skip_fastbaps: true
 ```
 
-> **Command-line values on Nextflow 26.** A value typed after a parameter on the command line arrives as text, not as a number or true/false. `--skip_x true` works, but `--skip_x false` does **not** switch a step on, and `--max_cpus 8` fails validation. Values in a params file keep their proper types, so use one for booleans set to `false` and for numbers such as `max_cpus`.
+> **Command line or params file.** The pipeline declares the type of every numeric and boolean parameter, so values given on the command line are converted: `--max_cpus 32`, `--skip_fastbaps false` and `--min_allele_fraction 0.9` all work as written. A params file is still useful for recording a whole configuration.
 
 ### Reproducibility
 
@@ -221,7 +221,7 @@ See [parameters.md](parameters.md) for the full parameter reference. Common sett
 - `sra_list`, `ont_sra_list`, `pacbio_sra_list`: accession lists to download
 - `outdir`: output directory
 - `ref_genbank`: reference GenBank file (required)
-- `use_global_alignment`: merge with the curated global core alignment (default `true`; set `false` in a params file for cohort-only)
+- `use_global_alignment`: merge with the curated global core alignment (default `true`; use `--use_global_alignment false` for cohort-only)
 - `global_core_alignment`: your own global core alignment file, instead of the curated one
 - `cohort_core_alignment`: input cohort core alignment file
 - `skip_fastbaps`: skip FastBAPS clustering
