@@ -59,8 +59,8 @@ workflow CHOLERASEQ {
     // auto-discovery flags (from Cholera_genomics integration). GET_INPUT_WF
     // enforces the mutual-exclusivity/at-least-one-mode rules itself at runtime;
     // this is just an early, clear fail if literally nothing was given.
-    if (!params.input && !params.reads_dir && !params.ont_reads_dir && !params.pacbio_hifi_reads_dir && !params.pacbio_clr_reads_dir && !params.contigs_dir && !params.sra_list && !params.ont_sra_list && !params.pacbio_sra_list) {
-        error('No input specified. Use --input <samplesheet.csv>, or one or more of --reads_dir/--ont_reads_dir/--pacbio_hifi_reads_dir/--pacbio_clr_reads_dir/--contigs_dir/--sra_list/--ont_sra_list/--pacbio_sra_list.')
+    if (!params.input && !params.reads_dir && !params.ont_reads_dir && !params.pacbio_reads_dir && !params.pacbio_hifi_reads_dir && !params.pacbio_clr_reads_dir && !params.contigs_dir && !params.sra_list && !params.ont_sra_list && !params.pacbio_sra_list) {
+        error('No input specified. Use --input <samplesheet.csv>, or one or more of --reads_dir/--ont_reads_dir/--pacbio_reads_dir/--pacbio_hifi_reads_dir/--pacbio_clr_reads_dir/--contigs_dir/--sra_list/--ont_sra_list/--pacbio_sra_list.')
     }
 
     if (!(params.download_method in ['sratools', 'ftp', 'aspera'])) {

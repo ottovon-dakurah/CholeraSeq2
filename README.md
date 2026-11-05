@@ -62,11 +62,11 @@ The pipeline expects an input sample sheet in CSV format with at least these col
 For single-end, long-read or assembly inputs, set `fastq_2` to blank. Assemblies are accepted as FASTA files (optionally gzipped) in `fastq_1`.
 Two optional columns are supported: `sra_id`, to download a sample from SRA/ENA instead of using local files, and `platform`, which is `illumina` (default), `nanopore`, `pacbio_hifi`, `pacbio_clr` or `pacbio`.
 
-Instead of a sample sheet, samples can be found in folders (`--reads_dir`, `--ont_reads_dir`, `--pacbio_hifi_reads_dir`, `--pacbio_clr_reads_dir`, `--contigs_dir`) or downloaded from accession lists (`--sra_list`, `--ont_sra_list`, `--pacbio_sra_list`). These can be combined in one run; see `docs/usage.md`.
+Instead of a sample sheet, samples can be found in folders (`--reads_dir`, `--ont_reads_dir`, `--pacbio_reads_dir`, `--pacbio_hifi_reads_dir`, `--pacbio_clr_reads_dir`, `--contigs_dir`) or downloaded from accession lists (`--sra_list`, `--ont_sra_list`, `--pacbio_sra_list`). These can be combined in one run; see `docs/usage.md`.
 
 A reference GenBank file is required (`--ref_genbank`). The repository includes `resources/reference/GCF_003063785.full.gbk`, which is recommended for compatibility with the published global core alignment.
 
-By default each run merges the cohort with a curated global core alignment of published *V. cholerae* genomes, placing new isolates among known lineages. Use `--use_global_alignment false` (or `use_global_alignment: false` in a params file) for a cohort-only analysis, or `--global_core_alignment` to supply your own alignment.
+By default each run merges the cohort with the curated global core alignment of 4196 published *V. cholerae* genomes, placing new isolates among known lineages. This adds a ~17.3 GB download and considerable compute. Use `--use_global_alignment false` (or `use_global_alignment: false` in a params file) for a cohort-only analysis, or `--global_core_alignment` to supply your own alignment.
 
 > **Note:** on Nextflow 26, values typed on the command line arrive as text: `--skip_fastbaps false` does not switch a step on, and `--max_cpus 8` fails validation. Put such values in a params file instead (see `docs/usage.md`).
 

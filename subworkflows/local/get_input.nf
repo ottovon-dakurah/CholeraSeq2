@@ -11,7 +11,9 @@ include { SRA_DOWNLOAD as SRA_DOWNLOAD_PACBIO   } from '../../modules/local/sra_
 //                   or single-end (no such suffix)
 //   --sra_list     text file, one SRA/ENA accession per line (Illumina)
 // Long-read directories (single-end; one flag per platform so chemistries can
-// share a run): --ont_reads_dir, --pacbio_hifi_reads_dir, --pacbio_clr_reads_dir.
+// share a run): --ont_reads_dir, --pacbio_reads_dir, --pacbio_hifi_reads_dir, --pacbio_clr_reads_dir.
+// --pacbio_reads_dir leaves the chemistry unstated, so it is detected from the reads
+// (see modules/local/pacbio_chemistry/main.nf); the _hifi/_clr folders state it explicitly.
 // --platform (default 'illumina') tags every sample discovered via
 // --reads_dir as 'illumina', 'nanopore', or 'pacbio' - one directory is
 // assumed to be one platform per run.
@@ -40,10 +42,10 @@ workflow GET_INPUT_WF {
         ch_versions = Channel.empty()
         reads_ch    = Channel.empty()
 
-        def any_dir_or_list_mode = params.reads_dir || params.ont_reads_dir || params.pacbio_hifi_reads_dir || params.pacbio_clr_reads_dir || params.contigs_dir || params.sra_list || params.ont_sra_list || params.pacbio_sra_list
+        def any_dir_or_list_mode = params.reads_dir || params.ont_reads_dir || params.pacbio_reads_dir || params.pacbio_hifi_reads_dir || params.pacbio_clr_reads_dir || params.contigs_dir || params.sra_list || params.ont_sra_list || params.pacbio_sra_list
 
         if (params.input && any_dir_or_list_mode) {
-            error("--input cannot be combined with --reads_dir/--ont_reads_dir/--pacbio_hifi_reads_dir/--pacbio_clr_reads_dir/--contigs_dir/--sra_list/--ont_sra_list/--pacbio_sra_list. Use a samplesheet OR the directory/list flags, not both.")
+            error("--input cannot be combined with --reads_dir/--ont_reads_dir/--pacbio_reads_dir/--pacbio_hifi_reads_dir/--pacbio_clr_reads_dir/--contigs_dir/--sra_list/--ont_sra_list/--pacbio_sra_list. Use a samplesheet OR the directory/list flags, not both.")
         }
 
         if (params.input) {
@@ -113,6 +115,9 @@ workflow GET_INPUT_WF {
             //
             if (params.ont_reads_dir) {
                 reads_ch = reads_ch.mix( longread_dir_channel(params.ont_reads_dir, 'nanopore') )
+            }
+            if (params.pacbio_reads_dir) {
+                reads_ch = reads_ch.mix( longread_dir_channel(params.pacbio_reads_dir, 'pacbio') )
             }
             if (params.pacbio_hifi_reads_dir) {
                 reads_ch = reads_ch.mix( longread_dir_channel(params.pacbio_hifi_reads_dir, 'pacbio_hifi') )
@@ -197,7 +202,7 @@ workflow GET_INPUT_WF {
             }
 
         } else {
-            error("No input specified. Use --input <samplesheet.csv>, or one or more of --reads_dir/--ont_reads_dir/--pacbio_hifi_reads_dir/--pacbio_clr_reads_dir/--contigs_dir/--sra_list/--ont_sra_list/--pacbio_sra_list.")
+            error("No input specified. Use --input <samplesheet.csv>, or one or more of --reads_dir/--ont_reads_dir/--pacbio_reads_dir/--pacbio_hifi_reads_dir/--pacbio_clr_reads_dir/--contigs_dir/--sra_list/--ont_sra_list/--pacbio_sra_list.")
         }
 
     emit:

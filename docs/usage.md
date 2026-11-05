@@ -56,6 +56,7 @@ No sample sheet is needed when samples are found in folders:
 | --- | --- |
 | `--reads_dir` | Illumina fastq. Paired files (`<id>_R1/_R2.fastq.gz` or `<id>_1/_2.fastq.gz`) are paired up; any other `<id>.fastq.gz` is single-end. Tagged with `--platform` (default `illumina`). |
 | `--ont_reads_dir` | Nanopore reads: each `.fastq.gz`/`.fq.gz` file is one sample. |
+| `--pacbio_reads_dir` | PacBio reads of unstated chemistry: each file is one sample, and HiFi or CLR is detected from the reads. |
 | `--pacbio_hifi_reads_dir` | PacBio HiFi reads: each file is one sample. |
 | `--pacbio_clr_reads_dir` | PacBio CLR reads: each file is one sample. |
 | `--contigs_dir` | Assemblies (`.fasta`/`.fna`/`.fa`, optionally gzipped, e.g. NCBI's `<acc>_genomic.fna.gz`). Every matching file is a sample. |
@@ -115,9 +116,9 @@ By default each run merges the cohort's core alignment with a curated global cor
 
 - To analyse the cohort on its own, put `use_global_alignment: false` in a params file. A value typed on the command line also works here (`--use_global_alignment false`), because this parameter accepts the string.
 - To use your own reference alignment instead, set `global_core_alignment` to its path or URL.
-- The curated alignment is downloaded at run time, so a run needs network access unless you point `global_core_alignment` at a local copy.
+- The curated alignment holds 4196 public *V. cholerae* genomes and is about 17.3 GB. It is downloaded at run time, so a run needs network access and disk space; for repeated runs, download it once and point `global_core_alignment` at the local copy. The same Zenodo record also holds a 100-genome subset (`cholera_global_n100_...`) intended for testing, which is useful for a quick check but is not the global alignment.
 
-Adding the global alignment increases the number of sequences going into Gubbins and IQ-TREE, so these steps take longer.
+Adding the global alignment puts 4196 further sequences into cleaning, clustering, recombination filtering and tree inference, so those steps take substantially longer and need considerably more memory than a cohort-only run. For a quick run, or on a smaller machine, set `use_global_alignment: false`.
 
 ## Running the pipeline
 
