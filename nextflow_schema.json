@@ -477,12 +477,14 @@
             "properties": {
                 "pacbio_mode": {
                     "type": "string",
-                    "default": "hifi",
+                    "default": "auto",
                     "enum": [
+                        "auto",
                         "hifi",
                         "raw"
                     ],
-                    "description": "Flye assembly mode for PacBio samples: 'hifi' (--pacbio-hifi, for high-accuracy CCS reads) or 'raw' (--pacbio-raw, for older/CLR-era data). Not auto-detected - check the accession's actual read type before choosing."
+                    "fa_icon": "fas fa-magic",
+                    "description": "Flye mode for samples whose platform is plain 'pacbio'. 'auto' detects HiFi vs CLR from the reads; 'hifi' and 'raw' force a mode."
                 },
                 "long_read_min_length": {
                     "type": "integer",
@@ -497,6 +499,18 @@
                 "long_read_target_bases": {
                     "type": "integer",
                     "description": "Optional Filtlong --target_bases: cap each long-read sample at this many bases (keeps the best reads). ~400000000 is roughly 100x of a 4 Mb genome. Unset = no cap."
+                },
+                "pacbio_detect_reads": {
+                    "type": "integer",
+                    "default": 20000,
+                    "fa_icon": "fas fa-dna",
+                    "description": "Reads subsampled per sample for PacBio chemistry detection."
+                },
+                "pacbio_detect_threshold": {
+                    "type": "number",
+                    "default": 0.03,
+                    "fa_icon": "fas fa-ruler-horizontal",
+                    "description": "Median read-to-read divergence below which a PacBio sample is called HiFi."
                 }
             }
         }

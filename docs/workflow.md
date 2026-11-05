@@ -66,7 +66,7 @@ Assembly input is accepted as FASTA and bypasses read trimming and de novo assem
 
 ### Long-read QC and assembly
 
-`NanoPlot` reports read-length and quality statistics, `Filtlong` removes short and low-quality reads (optionally capping coverage with `long_read_target_bases`), and `Flye` assembles each sample. Flye's mode depends on the data: `--nano-raw` for Nanopore, `--pacbio-hifi` for PacBio HiFi and `--pacbio-raw` for PacBio CLR. The chemistry is not auto-detected; it comes from the folder option or the sample sheet's `platform` value. A sample whose assembly fails is skipped with a `NOTE`, and the run continues.
+`NanoPlot` reports read-length and quality statistics, `Filtlong` removes short and low-quality reads (optionally capping coverage with `long_read_target_bases`), and `Flye` assembles each sample. For PacBio samples whose chemistry is not stated, it is detected from the reads: a subsample is mapped against itself with `minimap2`, and the median divergence of the overlaps separates HiFi (well under 1%) from CLR (around 8-12%). Flye's mode depends on the data: `--nano-raw` for Nanopore, `--pacbio-hifi` for PacBio HiFi and `--pacbio-raw` for PacBio CLR. The chemistry is not auto-detected; it comes from the folder option or the sample sheet's `platform` value. A sample whose assembly fails is skipped with a `NOTE`, and the run continues.
 
 ### Reference-guided variant calling
 

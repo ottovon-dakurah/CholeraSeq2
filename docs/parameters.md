@@ -70,7 +70,9 @@ Nanopore and PacBio samples are quality-checked (NanoPlot), filtered (Filtlong) 
 
 | Parameter | Default | Description |
 | --- | --- | --- |
-| `pacbio_mode` | `hifi` | Flye mode for samples tagged plain `pacbio` (and for `pacbio_sra_list`): `hifi` (`--pacbio-hifi`) or `raw` (`--pacbio-raw`, for CLR). Not auto-detected. |
+| `pacbio_mode` | `auto` | Flye mode for samples tagged plain `pacbio` (and for `pacbio_sra_list`). `auto` detects the chemistry from the reads; `hifi` (`--pacbio-hifi`) and `raw` (`--pacbio-raw`) force a mode. |
+| `pacbio_detect_reads` | `20000` | Reads subsampled per sample for chemistry detection. |
+| `pacbio_detect_threshold` | `0.03` | Median read-to-read divergence below which a sample is called HiFi. |
 | `long_read_min_length` | `1000` | Filtlong `--min_length`. |
 | `long_read_keep_percent` | `90` | Filtlong `--keep_percent`. |
 | `long_read_target_bases` | none | Optional Filtlong `--target_bases`: keep the best reads up to this many bases per sample (e.g. `400000000`, about 100x of a 4 Mb genome). |

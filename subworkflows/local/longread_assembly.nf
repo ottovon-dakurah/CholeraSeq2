@@ -3,6 +3,7 @@ include { FILTLONG     } from '../../modules/local/filtlong/main.nf'
 include { FLYE as FLYE_ONT          } from '../../modules/local/flye/main.nf'
 include { FLYE as FLYE_PACBIO_HIFI  } from '../../modules/local/flye/main.nf'
 include { FLYE as FLYE_PACBIO_CLR   } from '../../modules/local/flye/main.nf'
+include { PACBIO_CHEMISTRY          } from '../../modules/local/pacbio_chemistry/main.nf'
 
 // QC + assembly for ONT/PacBio long-read samples. Once Flye produces contigs,
 // they're tagged is_contig:true and emitted in the same shape as any other
@@ -35,10 +36,28 @@ workflow LONGREAD_ASSEMBLY_WF {
         ch_versions = ch_versions.mix(FILTLONG.out.versions)
 
         // Chemistry can be set per sample: platform 'pacbio_hifi' / 'pacbio_clr'
-        // are explicit; plain 'pacbio' falls back to the run-wide --pacbio_mode.
-        // (Still selected, not auto-detected - nothing inspects the reads.)
+        // are explicit. Plain 'pacbio' is detected from the reads when
+        // --pacbio_mode is 'auto' (the default), and otherwise falls back to the
+        // run-wide --pacbio_mode. Detection is worth it because submitter labels,
+        // instrument model, read length and reported quality all fail to predict
+        // which Flye mode works, while read-to-read divergence separates the two
+        // chemistries cleanly (see modules/local/pacbio_chemistry/main.nf).
         FILTLONG.out.reads
-            .branch { meta, reads ->
+            .branch { meta, _reads ->
+                detect: meta.platform == 'pacbio' && params.pacbio_mode.toString().toLowerCase() == 'auto'
+                other:  true
+            }
+            .set { pre_ch }
+
+        PACBIO_CHEMISTRY ( pre_ch.detect )
+        ch_versions = ch_versions.mix(PACBIO_CHEMISTRY.out.versions)
+
+        // Detected samples carry their chemistry as the third element; put it on
+        // meta.platform so both routes below look identical from here on.
+        detected_ch = PACBIO_CHEMISTRY.out.typed.map { meta, reads, chem -> [ meta + [platform: chem.trim()], reads ] }
+
+        detected_ch.mix(pre_ch.other)
+            .branch { meta, _reads ->
                 def chem = meta.platform == 'pacbio' ? (params.pacbio_mode == 'hifi' ? 'pacbio_hifi' : 'pacbio_clr') : meta.platform
                 ont:          chem == 'nanopore'
                 pacbio_hifi:  chem == 'pacbio_hifi'
