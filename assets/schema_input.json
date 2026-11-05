@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/CERI-KRISP/CholeraSeq/master/assets/schema_input.json",
     "title": "CERI-KRISP/CholeraSeq pipeline - params.input schema",
     "description": "Schema for the file provided with params.input",
@@ -13,12 +13,24 @@
                 "errorMessage": "Sample name must be provided and cannot contain spaces"
             },
             "fastq_1": {
-                "type": "string",
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "errorMessage": "fastq_1 must be a FastQ file ('.fq.gz'/'.fastq.gz') or an assembly ('.fasta'/'.fna'/'.fa', optionally gzipped), without spaces. Leave empty when 'sra_id' is given.",
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+\\.f(ast)?q\\.gz$"
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+\\.(fasta|fna|fa)(\\.gz)?$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ]
             },
             "fastq_2": {
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
+                "errorMessage": "fastq_2 must be a FastQ file ('.fq.gz'/'.fastq.gz') without spaces, or empty for single-end, long-read and assembly input.",
                 "anyOf": [
                     {
                         "type": "string",
@@ -29,8 +41,42 @@
                         "maxLength": 0
                     }
                 ]
+            },
+            "sra_id": {
+                "errorMessage": "sra_id must be an SRA/ENA run accession (e.g. SRR8364252, ERR1234567, DRR213512), or empty.",
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^[SED]RR\\d+$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ]
+            },
+            "platform": {
+                "errorMessage": "platform must be one of illumina, nanopore, pacbio, pacbio_hifi, pacbio_clr, or empty (defaults to illumina).",
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "enum": [
+                            "illumina",
+                            "nanopore",
+                            "pacbio",
+                            "pacbio_hifi",
+                            "pacbio_clr"
+                        ]
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ]
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": [
+            "sample"
+        ]
     }
 }

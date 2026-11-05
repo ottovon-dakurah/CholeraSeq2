@@ -1,10 +1,39 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/CERI-KRISP/CholeraSeq/master/nextflow_schema.json",
     "title": "CERI-KRISP/CholeraSeq pipeline parameters",
     "description": "A Nextflow pipeline for Cholera outbreak analysis",
     "type": "object",
-    "definitions": {
+    "allOf": [
+        {
+            "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/reference_genome_options"
+        },
+        {
+            "$ref": "#/$defs/quality_control_options"
+        },
+        {
+            "$ref": "#/$defs/clustering_options"
+        },
+        {
+            "$ref": "#/$defs/assembly_typing_amr_options"
+        },
+        {
+            "$ref": "#/$defs/long_read_options"
+        },
+        {
+            "$ref": "#/$defs/institutional_config_options"
+        },
+        {
+            "$ref": "#/$defs/max_job_request_options"
+        },
+        {
+            "$ref": "#/$defs/generic_options"
+        }
+    ],
+    "$defs": {
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
@@ -326,6 +355,12 @@
                     "description": "Show all params when using `--help`",
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
+                },
+                "trace_timestamp": {
+                    "type": "string",
+                    "hidden": true,
+                    "fa_icon": "fas fa-clock",
+                    "description": "Timestamp added to the trace, report and timeline file names (set automatically)."
                 }
             }
         },
@@ -520,34 +555,5 @@
                 }
             }
         }
-    },
-    "allOf": [
-        {
-            "$ref": "#/definitions/input_output_options"
-        },
-        {
-            "$ref": "#/definitions/reference_genome_options"
-        },
-        {
-            "$ref": "#/definitions/quality_control_options"
-        },
-        {
-            "$ref": "#/definitions/clustering_options"
-        },
-        {
-            "$ref": "#/definitions/assembly_typing_amr_options"
-        },
-        {
-            "$ref": "#/definitions/long_read_options"
-        },
-        {
-            "$ref": "#/definitions/institutional_config_options"
-        },
-        {
-            "$ref": "#/definitions/max_job_request_options"
-        },
-        {
-            "$ref": "#/definitions/generic_options"
-        }
-    ]
+    }
 }

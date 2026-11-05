@@ -75,6 +75,8 @@ By default each run merges the cohort with the curated global core alignment of 
 The pipeline documentation is available in the `docs/` directory and includes:
 
 - `docs/usage.md`
+
+Parameters are validated with the [nf-schema](https://nextflow-io.github.io/nf-schema/) plugin, which Nextflow fetches on the first run (so an initial run needs network access).
 - `docs/parameters.md`
 - `docs/output.md`
 - `docs/workflow.md`

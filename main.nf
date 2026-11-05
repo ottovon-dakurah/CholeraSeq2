@@ -68,6 +68,7 @@ params {
     min_parsimony_coverage: Float
 }
 
+include { validateParameters; paramsHelp; paramsSummaryLog; paramsSummaryMap } from 'plugin/nf-schema'
 include { CHOLERASEQ } from './workflows/choleraseq'
 
 //
@@ -92,6 +93,18 @@ workflow {
     // NOTE: moved here from top-level script scope - bare statements outside
     // a process/workflow/function are not allowed under Nextflow's strict
     // script syntax (default since Nextflow 26.04).
+    // Help, parameter summary and validation now come from nf-schema, driven by
+    // nextflow_schema.json. --help is handled by the plugin itself (validation.help).
+    if (params.help) {
+        log.info WorkflowMain.logoAndCitation(workflow, params)
+        log.info paramsHelp()
+        System.exit(0)
+    }
+    log.info WorkflowMain.logoAndCitation(workflow, params)
+    log.info paramsSummaryLog(workflow)
+    validateParameters()
+
+    // Remaining checks that are not expressible in the schema
     WorkflowMain.initialise(workflow, params, log)
 
     CERI_KRISP ()
@@ -128,7 +141,7 @@ workflow {
     def lg   = log
     def pd   = projectDir
     workflow.onComplete {
-        def summary_params  = NfcoreSchema.paramsSummaryMap(wf, prms)
+        def summary_params  = paramsSummaryMap(wf)
         def multiqc_report  = ["${prms.outdir}/multiqc/multiqc_report.html"]
         if (prms.email || prms.email_on_fail) {
             NfcoreTemplate.email(wf, prms, summary_params, pd, lg, multiqc_report)

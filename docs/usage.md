@@ -159,6 +159,15 @@ skip_fastbaps: true
 
 > **Command line or params file.** The pipeline declares the type of every numeric and boolean parameter, so values given on the command line are converted: `--max_cpus 32`, `--skip_fastbaps false` and `--min_allele_fraction 0.9` all work as written. A params file is still useful for recording a whole configuration.
 
+### Parameter validation
+
+Parameters are validated against `nextflow_schema.json` by the
+[nf-schema](https://nextflow-io.github.io/nf-schema/) plugin, which Nextflow downloads
+automatically on the first run. A mistyped or out-of-range value stops the run with a
+clear message before any work starts, and `--help` lists every parameter with its type
+and default. Sample sheets given with `--input` are checked against
+`assets/schema_input.json` in the same way.
+
 ### Reproducibility
 
 Specifying a pipeline release tag ensures the same code version is used:

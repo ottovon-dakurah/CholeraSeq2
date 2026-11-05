@@ -7,6 +7,7 @@
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
+include { paramsSummaryMap } from 'plugin/nf-schema'
 include { GET_INPUT_WF                } from '../subworkflows/local/get_input'
 include { QUALITY_CONTROL_WF         } from '../subworkflows/local/quality_control'
 include { VARIANT_CALLING_WF         } from '../subworkflows/local/variant_calling'
@@ -46,7 +47,7 @@ workflow CHOLERASEQ {
     // `exit`, code, message` command form is a removed DSL1-era construct).
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
+    def summary_params = paramsSummaryMap(workflow)
 
     // Validate input parameters
     WorkflowCholera_analysis_nf.initialise(params, log)
