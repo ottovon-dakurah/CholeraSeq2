@@ -452,12 +452,12 @@
                     "type": "boolean",
                     "default": true,
                     "fa_icon": "fas fa-globe-africa",
-                    "description": "Merge the cohort with the curated global core alignment of 4196 genomes (on by default), placing new isolates in a global context. This adds a large download and substantially increases cleaning, clustering, recombination and tree-inference time and memory; set false for a cohort-only analysis."
+                    "description": "Merge the cohort with the curated global core alignment (on by default), placing new isolates in a global context. This adds a large download and substantially increases cleaning, clustering, recombination and tree-inference time and memory; set false for a cohort-only analysis."
                 },
                 "default_global_core_alignment": {
                     "type": "string",
                     "fa_icon": "fas fa-link",
-                    "description": "URL or path of the curated global core alignment (4196 public V. cholerae genomes, ~17.3 GB) used when use_global_alignment is true and no global_core_alignment is given. The n100 file in the same Zenodo record is a test subset."
+                    "description": "URL or path of the curated global core alignment (~17 GB, pinned to a dated release) used when use_global_alignment is true and no global_core_alignment is given. The n100 file in the same Zenodo record is a test subset."
                 }
             }
         },

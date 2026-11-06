@@ -116,9 +116,9 @@ By default each run merges the cohort's core alignment with a curated global cor
 
 - To analyse the cohort on its own, use `--use_global_alignment false`, or put `use_global_alignment: false` in a params file.
 - To use your own reference alignment instead, set `global_core_alignment` to its path or URL.
-- The curated alignment holds 4196 public *V. cholerae* genomes and is about 17.3 GB. It is downloaded at run time, so a run needs network access and disk space; for repeated runs, download it once and point `global_core_alignment` at the local copy. The same Zenodo record also holds a 100-genome subset (`cholera_global_n100_...`) intended for testing, which is useful for a quick check but is not the global alignment.
+- The curated alignment holds several thousand public *V. cholerae* genomes and is about 17 GB. It is downloaded at run time, so a run needs network access and disk space; for repeated runs, download it once and point `global_core_alignment` at the local copy. The same Zenodo record also holds a 100-genome subset (`cholera_global_n100_...`) intended for testing, which is useful for a quick check but is not the global alignment. The curated alignment is updated as new genomes are added; the pipeline pins a dated release so results stay reproducible, and `--global_core_alignment` takes a newer file or a local copy.
 
-Adding the global alignment puts 4196 further sequences into cleaning, clustering, recombination filtering and tree inference, so those steps take substantially longer and need considerably more memory than a cohort-only run. For a quick run, or on a smaller machine, set `use_global_alignment: false`.
+Adding the global alignment puts every one of its sequences into cleaning, clustering, recombination filtering and tree inference, so those steps take substantially longer and need considerably more memory than a cohort-only run. For a quick run, or on a smaller machine, set `use_global_alignment: false`.
 
 ## Running the pipeline
 

@@ -31,8 +31,8 @@ Give either `input`, or one or more of the folder and accession-list options (th
 | Parameter | Default | Description |
 | --- | --- | --- |
 | `ref_genbank` | none (required) | Path to the reference GenBank file used by `snippy` and `varcodons.py`. The repository includes `resources/reference/GCF_003063785.full.gbk`, which is recommended for compatibility with the published global core alignment. The `test` profile sets it. |
-| `use_global_alignment` | `true` | Merge the cohort with the curated global core alignment of 4196 public genomes, placing new isolates in a global context. Adds a ~17.3 GB download and substantially increases clustering, recombination and tree-inference time and memory; set `false` for a cohort-only analysis. |
-| `default_global_core_alignment` | Zenodo URL | The curated global core alignment (4196 genomes, ~17.3 GB) used when `use_global_alignment` is true and no `global_core_alignment` is given. The `n100` file in the same record is a test subset, not the global alignment. |
+| `use_global_alignment` | `true` | Merge the cohort with the curated global core alignment of public genomes, placing new isolates in a global context. Adds a ~17.3 GB download and substantially increases clustering, recombination and tree-inference time and memory; set `false` for a cohort-only analysis. |
+| `default_global_core_alignment` | Zenodo URL | The curated global core alignment (~17 GB) used when `use_global_alignment` is true and no `global_core_alignment` is given. Pinned to a dated release for reproducibility. The `n100` file in the same record is a test subset, not the global alignment. |
 | `global_core_alignment` | `null` | Your own global core-genome alignment FASTA to merge with, instead of the curated one. Ignored when `use_global_alignment` is false. |
 | `cohort_core_alignment` | `null` | Path to an existing cohort core-genome alignment FASTA to merge into a global core alignment. |
 

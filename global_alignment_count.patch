@@ -1,0 +1,91 @@
+diff --git a/README.md b/README.md
+index 604534a..99f2947 100644
+--- a/README.md
++++ b/README.md
+@@ -66,7 +66,7 @@ Instead of a sample sheet, samples can be found in folders (`--reads_dir`, `--on
+ 
+ A reference GenBank file is required (`--ref_genbank`). The repository includes `resources/reference/GCF_003063785.full.gbk`, which is recommended for compatibility with the published global core alignment.
+ 
+-By default each run merges the cohort with the curated global core alignment of 4196 published *V. cholerae* genomes, placing new isolates among known lineages. This adds a ~17.3 GB download and considerable compute. Use `--use_global_alignment false` (or `use_global_alignment: false` in a params file) for a cohort-only analysis, or `--global_core_alignment` to supply your own alignment.
++By default each run merges the cohort with the curated global core alignment of published *V. cholerae* genomes, placing new isolates among known lineages. This adds a ~17 GB download and considerable compute. Use `--use_global_alignment false` (or `use_global_alignment: false` in a params file) for a cohort-only analysis, or `--global_core_alignment` to supply your own alignment.
+ 
+ > **Note:** numbers and switches can be set directly on the command line (`--max_cpus 32`, `--skip_fastbaps false`), because the pipeline declares their types. A params file works too and is handy for recording a configuration.
+ 
+diff --git a/docs/parameters.md b/docs/parameters.md
+index ad55da9..8e80734 100644
+--- a/docs/parameters.md
++++ b/docs/parameters.md
+@@ -31,8 +31,8 @@ Give either `input`, or one or more of the folder and accession-list options (th
+ | Parameter | Default | Description |
+ | --- | --- | --- |
+ | `ref_genbank` | none (required) | Path to the reference GenBank file used by `snippy` and `varcodons.py`. The repository includes `resources/reference/GCF_003063785.full.gbk`, which is recommended for compatibility with the published global core alignment. The `test` profile sets it. |
+-| `use_global_alignment` | `true` | Merge the cohort with the curated global core alignment of 4196 public genomes, placing new isolates in a global context. Adds a ~17.3 GB download and substantially increases clustering, recombination and tree-inference time and memory; set `false` for a cohort-only analysis. |
+-| `default_global_core_alignment` | Zenodo URL | The curated global core alignment (4196 genomes, ~17.3 GB) used when `use_global_alignment` is true and no `global_core_alignment` is given. The `n100` file in the same record is a test subset, not the global alignment. |
++| `use_global_alignment` | `true` | Merge the cohort with the curated global core alignment of public genomes, placing new isolates in a global context. Adds a ~17.3 GB download and substantially increases clustering, recombination and tree-inference time and memory; set `false` for a cohort-only analysis. |
++| `default_global_core_alignment` | Zenodo URL | The curated global core alignment (~17 GB) used when `use_global_alignment` is true and no `global_core_alignment` is given. Pinned to a dated release for reproducibility. The `n100` file in the same record is a test subset, not the global alignment. |
+ | `global_core_alignment` | `null` | Your own global core-genome alignment FASTA to merge with, instead of the curated one. Ignored when `use_global_alignment` is false. |
+ | `cohort_core_alignment` | `null` | Path to an existing cohort core-genome alignment FASTA to merge into a global core alignment. |
+ 
+diff --git a/docs/usage.md b/docs/usage.md
+index 1d9daa0..38bda9d 100644
+--- a/docs/usage.md
++++ b/docs/usage.md
+@@ -116,9 +116,9 @@ By default each run merges the cohort's core alignment with a curated global cor
+ 
+ - To analyse the cohort on its own, use `--use_global_alignment false`, or put `use_global_alignment: false` in a params file.
+ - To use your own reference alignment instead, set `global_core_alignment` to its path or URL.
+-- The curated alignment holds 4196 public *V. cholerae* genomes and is about 17.3 GB. It is downloaded at run time, so a run needs network access and disk space; for repeated runs, download it once and point `global_core_alignment` at the local copy. The same Zenodo record also holds a 100-genome subset (`cholera_global_n100_...`) intended for testing, which is useful for a quick check but is not the global alignment.
++- The curated alignment holds several thousand public *V. cholerae* genomes and is about 17 GB. It is downloaded at run time, so a run needs network access and disk space; for repeated runs, download it once and point `global_core_alignment` at the local copy. The same Zenodo record also holds a 100-genome subset (`cholera_global_n100_...`) intended for testing, which is useful for a quick check but is not the global alignment. The curated alignment is updated as new genomes are added; the pipeline pins a dated release so results stay reproducible, and `--global_core_alignment` takes a newer file or a local copy.
+ 
+-Adding the global alignment puts 4196 further sequences into cleaning, clustering, recombination filtering and tree inference, so those steps take substantially longer and need considerably more memory than a cohort-only run. For a quick run, or on a smaller machine, set `use_global_alignment: false`.
++Adding the global alignment puts every one of its sequences into cleaning, clustering, recombination filtering and tree inference, so those steps take substantially longer and need considerably more memory than a cohort-only run. For a quick run, or on a smaller machine, set `use_global_alignment: false`.
+ 
+ ## Running the pipeline
+ 
+diff --git a/nextflow.config b/nextflow.config
+index 86ebe92..5fbd7c0 100644
+--- a/nextflow.config
++++ b/nextflow.config
+@@ -63,12 +63,17 @@ params {
+ 
+     // Core alignment
+     use_global_alignment  = true // merge the cohort with the curated global core alignment (set false for cohort-only)
+-    // The curated global core alignment of 4196 public V. cholerae genomes (Zenodo 16909942),
+-    // as described in the CholeraSeq paper. The n100 file in the same record is a test
+-    // subset, not the global alignment. NOTE: ~17.3 GB download, and it adds 4196 sequences
+-    // to cleaning, clustering, recombination filtering and tree inference - set
+-    // use_global_alignment = false for a cohort-only run, or point global_core_alignment at
+-    // a local copy to avoid re-downloading it.
++    // The curated global core alignment of public V. cholerae genomes (Zenodo 16909942).
++    // The n100 file in the same record is a test subset, not the global alignment.
++    //
++    // The URL is pinned to a dated release so a given pipeline version always analyses
++    // the same reference set; the curated alignment is updated as new genomes are added,
++    // so point --global_core_alignment at a newer file (or a local copy) to use one, and
++    // update this default when cutting a release.
++    //
++    // NOTE: ~17 GB download, and every sequence in it goes through cleaning, clustering,
++    // recombination filtering and tree inference - set use_global_alignment = false for a
++    // cohort-only run.
+     default_global_core_alignment = 'https://zenodo.org/records/16909942/files/cholera_global_n4196_2025.08.18.fasta?download=1'
+     global_core_alignment = null //pre-made alignment; overrides default_global_core_alignment when set	null	concatenate consensus sequences (prior to fastbaps and gubbins)
+     cohort_core_alignment = null //pre-made alignment to be concatenated to existing global alignment
+diff --git a/nextflow_schema.json b/nextflow_schema.json
+index a135735..a468a59 100644
+--- a/nextflow_schema.json
++++ b/nextflow_schema.json
+@@ -452,12 +452,12 @@
+                     "type": "boolean",
+                     "default": true,
+                     "fa_icon": "fas fa-globe-africa",
+-                    "description": "Merge the cohort with the curated global core alignment of 4196 genomes (on by default), placing new isolates in a global context. This adds a large download and substantially increases cleaning, clustering, recombination and tree-inference time and memory; set false for a cohort-only analysis."
++                    "description": "Merge the cohort with the curated global core alignment (on by default), placing new isolates in a global context. This adds a large download and substantially increases cleaning, clustering, recombination and tree-inference time and memory; set false for a cohort-only analysis."
+                 },
+                 "default_global_core_alignment": {
+                     "type": "string",
+                     "fa_icon": "fas fa-link",
+-                    "description": "URL or path of the curated global core alignment (4196 public V. cholerae genomes, ~17.3 GB) used when use_global_alignment is true and no global_core_alignment is given. The n100 file in the same Zenodo record is a test subset."
++                    "description": "URL or path of the curated global core alignment (~17 GB, pinned to a dated release) used when use_global_alignment is true and no global_core_alignment is given. The n100 file in the same Zenodo record is a test subset."
+                 }
+             }
+         },

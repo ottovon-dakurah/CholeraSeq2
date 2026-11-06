@@ -66,7 +66,7 @@ Instead of a sample sheet, samples can be found in folders (`--reads_dir`, `--on
 
 A reference GenBank file is required (`--ref_genbank`). The repository includes `resources/reference/GCF_003063785.full.gbk`, which is recommended for compatibility with the published global core alignment.
 
-By default each run merges the cohort with the curated global core alignment of 4196 published *V. cholerae* genomes, placing new isolates among known lineages. This adds a ~17.3 GB download and considerable compute. Use `--use_global_alignment false` (or `use_global_alignment: false` in a params file) for a cohort-only analysis, or `--global_core_alignment` to supply your own alignment.
+By default each run merges the cohort with the curated global core alignment of published *V. cholerae* genomes, placing new isolates among known lineages. This adds a ~17 GB download and considerable compute. Use `--use_global_alignment false` (or `use_global_alignment: false` in a params file) for a cohort-only analysis, or `--global_core_alignment` to supply your own alignment.
 
 > **Note:** numbers and switches can be set directly on the command line (`--max_cpus 32`, `--skip_fastbaps false`), because the pipeline declares their types. A params file works too and is handy for recording a configuration.
 
