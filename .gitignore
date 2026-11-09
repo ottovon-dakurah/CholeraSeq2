@@ -52,3 +52,4 @@ sra_results/
 /make_full_test_samplesheet.sh
 /make_subset.sh
 /list_unused.sh
+/*.patch
