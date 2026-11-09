@@ -173,7 +173,7 @@ and default. Sample sheets given with `--input` are checked against
 Specifying a pipeline release tag ensures the same code version is used:
 
 ```bash
-nextflow run CERI-KRISP/CholeraSeq -r 1.2.0 -profile docker --input samplesheet.csv --outdir results
+nextflow run CERI-KRISP/CholeraSeq -r 2.0.0-alpha -profile docker --input samplesheet.csv --outdir results
 ```
 
 ### Output locations

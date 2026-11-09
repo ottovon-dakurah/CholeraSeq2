@@ -90,6 +90,7 @@ Nanopore and PacBio samples are quality-checked (NanoPlot), filtered (Filtlong) 
 
 | Parameter | Default | Description |
 | --- | --- | --- |
+| `trace_timestamp` | run start time | Timestamp (`yyyy-MM-dd_HH-mm-ss`) added to the `pipeline_info/` report file names. Set automatically; there is normally no reason to change it. |
 | `multiqc_config` | `null` | Custom MultiQC configuration file. |
 | `multiqc_logo` | `${projectDir}/assets/CERI_logo_b.png` | Optional logo file to include in MultiQC reports. |
 | `multiqc_methods_description` | `null` | Optional YAML or text file with method descriptions for MultiQC. |

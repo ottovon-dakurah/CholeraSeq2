@@ -1,6 +1,6 @@
 [![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.15167441-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.15167441)
 
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A524.04.2-23aa62.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A525.04.8-23aa62.svg)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
@@ -8,7 +8,7 @@
 
 # CholeraSeq
 
-`CERI-KRISP/CholeraSeq` is a Nextflow DSL2 pipeline for phylogenetic analysis of *Vibrio cholerae* outbreak data.
+`CERI-KRISP/CholeraSeq` is a Nextflow DSL2 pipeline for phylogenetic analysis of *Vibrio cholerae* outbreak data. The pipeline has been published in the [Oxford Bioinformatics Journal](https://doi.org/10.1093/bioinformatics/btaf665) 📝.
 It converts raw reads or genome assemblies into a recombination-masked core-genome alignment and infers a maximum likelihood tree with `iqtree`.
 It also assembles read data and screens assemblies for sequence type and for AMR, virulence and plasmid genes.
 
