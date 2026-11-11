@@ -51,6 +51,7 @@ params {
     pacbio_detect_reads: Integer
     long_read_min_length: Integer
     long_read_keep_percent: Integer
+    long_read_target_bases: Integer
     min_trim_quality: Integer
     min_trim_length: Integer
     min_mapping_quality: Integer
