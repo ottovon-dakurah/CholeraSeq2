@@ -37,8 +37,12 @@ process PACBIO_CHEMISTRY {
     def threshold = params.pacbio_detect_threshold ?: 0.03
     def fallback  = (params.pacbio_mode == 'hifi') ? 'pacbio_hifi' : 'pacbio_clr'
     """
-    # whole FASTQ records only: 4 lines per read
+    # Whole FASTQ records only: 4 lines per read. head closes the pipe once it has
+    # enough, which kills zcat with SIGPIPE; pipefail would turn that into a failed
+    # task, so the subsampling runs with pipefail off.
+    set +o pipefail
     zcat -f ${reads} | head -n \$(( ${nreads} * 4 )) > subsample.fastq
+    set -o pipefail
 
     minimap2 -x ava-pb -t ${task.cpus} subsample.fastq subsample.fastq 2> minimap2.log \\
         | grep -o 'dv:f:[0-9.]*' | cut -d: -f3 | sort -n > divergences.txt || true
