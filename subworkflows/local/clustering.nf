@@ -60,8 +60,16 @@ workflow CLUSTERING_WF {
         // not silently dropped.
         in_run_gubbins_ch
             .branch { meta, fasta ->
-                def n_seqs = fasta.text.count('>')
-                keep: n_seqs >= (params.min_partition_size as int)   // as int: a CLI value arrives as a String, and Groovy's Integer >= String is silently false
+                // Count sequences by streaming the file, stopping as soon as the
+                // threshold is reached. fasta.text (as an earlier revision used) reads
+                // the whole alignment into one String, which overflows Java's maximum
+                // array length on a large cluster:
+                //   "Required array length 2147483639 + 9 is too large"
+                def need = (params.min_partition_size as int)   // as int: a CLI value can arrive as a String, and Groovy's Integer >= String is silently false
+                def n_seqs = fasta.withReader { reader ->
+                    reader.lines().filter { it.startsWith('>') }.limit(need).count()
+                }
+                keep: n_seqs >= need
                 skip: true
             }
             .set { gubbins_input_ch }
