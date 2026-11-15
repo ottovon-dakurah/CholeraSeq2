@@ -32,6 +32,24 @@ process GUBBINS {
     mkdir numba_cache_dir
     export NUMBA_CACHE_DIR='./numba_cache_dir'
 
+    # Gubbins' ancestral reconstruction (pyjar) hands the phylogeny to worker
+    # processes, which pickles it. Pickling recurses once per node, so a large or
+    # unbalanced tree exceeds Python's default 1000-frame limit and the run dies
+    # after the tree has already been built, hours in:
+    #   RecursionError: maximum recursion depth exceeded while pickling an object
+    # Python imports any `sitecustomize` module found on PYTHONPATH at interpreter
+    # start-up, before Gubbins runs, so raising the limit there fixes this without
+    # patching Gubbins itself. Deeper recursion also needs a larger thread stack,
+    # set before the worker pool creates its threads; the stack size is a virtual
+    # reservation and costs no resident memory.
+    mkdir -p pyfix
+    printf '%s\\n' \\
+        'import sys, threading' \\
+        'sys.setrecursionlimit(200000)' \\
+        'threading.stack_size(512 * 1024 * 1024)' \\
+        > pyfix/sitecustomize.py
+    export PYTHONPATH="\$PWD/pyfix\${PYTHONPATH:+:\$PYTHONPATH}"
+
     run_gubbins.py \\
         --threads $task.cpus \\
         $args \\
