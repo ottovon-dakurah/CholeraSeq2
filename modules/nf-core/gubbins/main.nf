@@ -50,6 +50,18 @@ process GUBBINS {
         > pyfix/sitecustomize.py
     export PYTHONPATH="\$PWD/pyfix\${PYTHONPATH:+:\$PYTHONPATH}"
 
+    # pyjar's ancestral reconstruction runs under Python multiprocessing, whose
+    # Manager process creates its temp directory under TMPDIR. Nextflow points
+    # TMPDIR at the task work directory, and where that is a network filesystem a
+    # file deleted while still open is silly-renamed to .nfsXXXXXX and cannot be
+    # unlinked, so the Manager's shutdown cleanup raises
+    #   OSError: [Errno 16] Device or resource busy: '.nfsXXXXXX'
+    # The Manager then exits while its workers are still running and the task
+    # hangs indefinitely instead of failing: no exit status is written, one core
+    # idles, and only the wall-clock limit ever ends it. Keeping the Manager's
+    # temp directory on container-local storage avoids the rename entirely.
+    export TMPDIR=/tmp
+
     run_gubbins.py \\
         --threads $task.cpus \\
         $args \\

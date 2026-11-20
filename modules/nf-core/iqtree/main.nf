@@ -68,6 +68,13 @@ process IQTREE {
     def trees_rf_arg                = trees_rf                ? "-rf $trees_rf"                 : ''
     def prefix                      = task.ext.prefix         ?: meta.id
     def memory                      = task.memory.toString().replaceAll(' ', '')
+    // The thread count is given explicitly rather than with `-nt AUTO`.
+    // Under AUTO, IQ-TREE sizes its thread pool to the cores it detects on
+    // the machine before the benchmark that would apply -ntmax, so the task
+    // is not bound by its cpus allocation: on a 32-core host a task
+    // allocated 6 cpus was measured at 1963% CPU across 32 threads, and
+    // spent over 46 h in a stage that takes 52 s with an explicit -nt.
+    // An explicit -nt also makes -ntmax redundant.
     """
     iqtree \\
         $args \\
@@ -86,8 +93,7 @@ process IQTREE {
         $suptree_arg \\
         $trees_rf\\
         -pre $prefix \\
-        -nt AUTO \\
-        -ntmax $task.cpus \\
+        -nt $task.cpus \\
         -mem $memory \\
 
     cat <<-END_VERSIONS > versions.yml
